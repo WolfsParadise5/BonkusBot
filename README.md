@@ -1,5 +1,6 @@
 # BonkusBot
-A discord bot, made to understand the Discord API by developer
+A discord bot, made to understand the Discord API by developer.
+Note that the following repository is new as sensitive information was accidentally shared on the older repository.
 
 The bot is able to tell jokes and crypto prices, with more planned features, including
 saving reminders and greeting people comming in and out of the server.
