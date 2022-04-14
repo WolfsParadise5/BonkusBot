@@ -4,14 +4,13 @@ import requests
 import random
 
 #Insert Bitrue API keycode here
-keycode = ""
+
 
 #Bitrue
 def checkBitrue(keypair):
     url = "https://www.bitrue.com/api/v1/ticker/price?symbol="
-    key = {'X-MBX-APIKEY':keycode}
     url += keypair
-    r = requests.get(url,params=key)
+    r = requests.get(url)
     return r.text
 
 #Save to savefile
