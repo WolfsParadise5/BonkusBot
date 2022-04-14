@@ -2,40 +2,51 @@ import discord
 import functions
 import json
 import os.path
+import os
 import random
-import pickle
+import mongodb_backend
 from discord.ext import commands,tasks
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_option
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #Insert token and guild_id prior to building the app
-token = ''
-guild_id = 0
+TOKEN = os.getenv("TOKEN")
+GUILD_ID = int(os.getenv("GUILD_ID"))
+KEYCODE = os.getenv("KEYCODE")
+
 client = commands.Bot(command_prefix = "!")
 slash = SlashCommand(client, sync_commands=True)
 
 @client.event
 async def on_ready():
+    reminders = mongodb_backend.getAllReminders()
+    for i in reminders:
+        print(i)
     print("Bot is ready")
 
+#Will be reimplementated
 @tasks.loop(seconds=100)
 async def consistentcheck_onprices():
 
-    #Get the data
-    openPickle = open("save.pickle","rb")
-    saveList = pickle.load(openPickle)
-    
-    for enum,i in len(saveList):
+    reminders = mongodb_backend.getAllReminders()
+    for i in reminders:
         
-        coinToCheck = i["coin"]
-        member = i["name"]
+        #Get required data
+        id = i["_id"]
+        coinToCheck = i["reminder"]
+        member = i["username"]
+
 
         #Get the current price
         priceGet = functions.checkBitrue(coinToCheck+"USDT")
+        print(priceGet)
         price = round(float(json.loads(priceGet)["price"]),2)
 
         #Check if goal is met
-        if i["priceIndicator"] >= price:
+        if float(i["price"]) >= price:
             print("Goal is met")
 
             #Inform user if goal is met
@@ -48,12 +59,9 @@ async def consistentcheck_onprices():
 
 
             #Delist goal if reached
-            del saveList[enum]
+            mongodb_backend.deletePost(id)
 
-            #Repickle the list
-            pickleSave = open("save.pik", "wb")
-            pickle.dump(saveList, pickleSave)
-            pickleSave.close()
+        print("Routine check completed!")
 
 
 @client.event
@@ -75,7 +83,7 @@ async def pingme(ctx):
 @slash.slash(
     name="hello",
     description="Send a random owo or uwu",
-    guild_ids=[guild_id]
+    guild_ids=[GUILD_ID]
 )
 async def _hello(ctx):
     num = random.randint(1,3)
@@ -91,7 +99,7 @@ async def _hello(ctx):
 @slash.slash(
     name = "checkprice",
     description = "Gets the price of crypto in USD/USDT", 
-    guild_ids=[guild_id],
+    guild_ids=[GUILD_ID],
     options = [
         {
             "name": "coin",
@@ -113,7 +121,7 @@ async def priceChecker(ctx, coin):
 @slash.slash(
     name = "remindprice",
     description = "Reminds user when the price reaches a limit",
-    guild_ids = [guild_id],
+    guild_ids = [GUILD_ID],
     options = [
         create_option(
             name= "coin",
@@ -123,7 +131,10 @@ async def priceChecker(ctx, coin):
         )
     ]
 )
+
+#To be reimplementated
 async def remind_price(ctx,coin):
+
 
     embed = discord.Embed(
         title="Please set the price goal you want to be reminded of. ",
@@ -138,11 +149,7 @@ async def remind_price(ctx,coin):
             await sent.delete()
 
             #Proceed to save
-            saveFileStatus = functions.pickleToFile({
-                "name" : ctx.author,
-                "coin" : coin,
-                "priceIndicator": str(priceDeterminor)
-            })
+            mongodb_backend.postNewPost(str(ctx.author), coin, str(priceDeterminor))
 
             await ctx.send("Reminder sucessfully saved.")
 
@@ -153,6 +160,8 @@ async def remind_price(ctx,coin):
         
         await ctx.send("Request has been cancelled")
 
-    
+#Fix starts here    
+#consistentcheck_onprices.start()
+#Fix ends here
+client.run(TOKEN)
 
-client.run(token)
