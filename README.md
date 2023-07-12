@@ -5,7 +5,7 @@ Note that the following repository is new as sensitive information was accidenta
 The bot is able to tell jokes and crypto prices, with more planned features, including
 saving reminders and greeting people comming in and out of the server.
 
-# COMMANDS:
+# Commands:
 !pog - returns "No u"
 
 !pingme - returns a message tagged with current discord username.
