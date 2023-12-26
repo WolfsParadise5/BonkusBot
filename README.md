@@ -17,5 +17,8 @@ Ex. : /checkprice ETH
 
 /remindprice - Currently broken as of 31st December 2021 and is being repaired
 
+# Current Progress:
+Bot is undergoing major changes, will be back soon
+
 
 
