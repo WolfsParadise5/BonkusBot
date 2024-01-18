@@ -13,6 +13,7 @@
   "author": "Naga K",
   "license": "ISC",
   "dependencies": {
+    "discord.js": "^14.14.1",
     "express": "^4.18.2"
   }
 }
